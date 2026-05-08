@@ -10,19 +10,37 @@ const registerBtn = document.getElementById("registerBtn");
 const loginBtn = document.getElementById("loginBtn");
 const tamperBtn = document.getElementById("tamperBtn");
 
-function show(value) {
+/**
+ * Renders any text or object payload in the main output panel.
+ *
+ * @param {string | Record<string, unknown>} value - Value to display
+ * @returns {void}
+ */
+const show = (value) => {
   if (typeof value === "string") {
     output.textContent = value;
   } else {
     output.textContent = JSON.stringify(value, null, 2);
   }
-}
+};
 
-function getUsername() {
+/**
+ * Returns a normalized username from the input field.
+ *
+ * @returns {string} Trimmed lowercase username
+ */
+const getUsername = () => {
   return usernameInput.value.trim().toLowerCase();
-}
+};
 
-async function postJSON(url, body) {
+/**
+ * Sends a JSON POST request and throws on non-2xx responses.
+ *
+ * @param {string} url - API endpoint path
+ * @param {Record<string, unknown>} body - Serializable JSON payload
+ * @returns {Promise<any>} Parsed response payload
+ */
+const postJSON = async (url, body) => {
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -38,33 +56,80 @@ async function postJSON(url, body) {
   }
 
   return data;
-}
+};
 
-async function loadConfig() {
+/**
+ * Loads and displays runtime server configuration metadata.
+ *
+ * @returns {Promise<void>}
+ */
+const loadConfig = async () => {
   const response = await fetch("/api/config");
   const config = await response.json();
   configOutput.textContent = JSON.stringify(config, null, 2);
-}
+};
 
-function base64URLToString(base64url) {
+/**
+ * Decodes a base64url string into a normal UTF-8 string.
+ *
+ * @param {string} base64url - Base64url encoded string
+ * @returns {string} Decoded string
+ */
+const base64URLToString = (base64url) => {
   const base64 = base64url
     .replace(/-/g, "+")
     .replace(/_/g, "/")
     .padEnd(Math.ceil(base64url.length / 4) * 4, "=");
 
   return atob(base64);
-}
+};
 
-function stringToBase64URL(value) {
+/**
+ * Encodes a plain string into base64url format.
+ *
+ * @param {string} value - String to encode
+ * @returns {string} Base64url encoded value
+ */
+const stringToBase64URL = (value) => {
   const base64 = btoa(value);
 
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
+};
 
-async function registerPasskey() {
+/**
+ * Checks browser capability before starting WebAuthn flows.
+ *
+ * @returns {boolean} True when WebAuthn is available
+ */
+const ensureWebAuthnSupport = () => {
+  if (!browserSupportsWebAuthn()) {
+    show("This browser does not support WebAuthn.");
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Redirects to the protected page after successful verification.
+ *
+ * @param {{ verified?: boolean }} verification - Verification response payload
+ * @returns {void}
+ */
+const redirectIfVerified = (verification) => {
+  if (verification.verified) {
+    window.location.href = "/protected.html";
+  }
+};
+
+/**
+ * Runs passkey registration and verifies the attestation on the server.
+ *
+ * @returns {Promise<void>}
+ */
+const registerPasskey = async () => {
   try {
-    if (!browserSupportsWebAuthn()) {
-      show("This browser does not support WebAuthn.");
+    if (!ensureWebAuthnSupport()) {
       return;
     }
 
@@ -97,20 +162,21 @@ async function registerPasskey() {
     );
 
     show(verification);
-
-    if (verification.verified) {
-      window.location.href = "/protected.html";
-    }
+    redirectIfVerified(verification);
   } catch (error) {
     console.error(error);
     show(`Registration failed:\n${error.message}`);
   }
-}
+};
 
-async function loginWithPasskey() {
+/**
+ * Runs passkey login and verifies the assertion on the server.
+ *
+ * @returns {Promise<void>}
+ */
+const loginWithPasskey = async () => {
   try {
-    if (!browserSupportsWebAuthn()) {
-      show("This browser does not support WebAuthn.");
+    if (!ensureWebAuthnSupport()) {
       return;
     }
 
@@ -141,18 +207,24 @@ async function loginWithPasskey() {
     );
 
     show(verification);
-
-    if (verification.verified) {
-      window.location.href = "/protected.html";
-    }
+    redirectIfVerified(verification);
   } catch (error) {
     console.error(error);
     show(`Login failed:\n${error.message}`);
   }
-}
+};
 
-async function tamperLoginResponse() {
+/**
+ * Performs a negative test by tampering with clientDataJSON challenge.
+ *
+ * @returns {Promise<void>}
+ */
+const tamperLoginResponse = async () => {
   try {
+    if (!ensureWebAuthnSupport()) {
+      return;
+    }
+
     const username = getUsername();
 
     if (!username) {
@@ -203,7 +275,7 @@ async function tamperLoginResponse() {
       error: error.message,
     });
   }
-}
+};
 
 registerBtn.addEventListener("click", registerPasskey);
 loginBtn.addEventListener("click", loginWithPasskey);
