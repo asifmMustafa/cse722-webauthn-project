@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSE722 WebAuthn Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="/style.css" />
+
+    <!-- SimpleWebAuthn browser UMD bundle -->
+    <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+  </head>
+
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>CSE722 WebAuthn Passwordless Login</h1>
+
+        <p>
+          Register and login using a passkey, platform authenticator, browser
+          password manager, or mobile authenticator.
+        </p>
+
+        <div class="info-box">
+          <strong>Server config</strong>
+          <pre id="configOutput">Loading...</pre>
+        </div>
+
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          placeholder="alice"
+          autocomplete="username webauthn"
+        />
+
+        <label for="displayName">Display name</label>
+        <input
+          id="displayName"
+          type="text"
+          placeholder="Alice Example"
+          autocomplete="name"
+        />
+
+        <div class="button-row">
+          <button id="registerBtn">Register passkey</button>
+          <button id="loginBtn">Login with passkey</button>
+        </div>
+
+        <hr />
+
+        <h2>Negative test</h2>
+        <p>
+          This button performs a real passkey login attempt, then tampers with
+          the signed client data before sending it to the server. The server
+          should reject it.
+        </p>
+
+        <button id="tamperBtn" class="danger">Tamper login response</button>
+
+        <h2>Output</h2>
+        <pre id="output"></pre>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

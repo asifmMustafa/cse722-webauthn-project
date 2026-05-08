@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Protected Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Protected Page</h1>
+
+        <p>
+          You can see this page only after successful WebAuthn authentication.
+        </p>
+
+        <h2>Logged-in user and authenticator info</h2>
+        <pre id="meOutput">Loading...</pre>
+
+        <button id="logoutBtn">Logout</button>
+      </section>
+    </main>
+
+    <script>
+      const meOutput = document.getElementById("meOutput");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      async function loadMe() {
+        const response = await fetch("/api/me");
+        const data = await response.json();
+
+        if (!response.ok) {
+          window.location.href = "/";
+          return;
+        }
+
+        meOutput.textContent = JSON.stringify(data, null, 2);
+      }
+
+      logoutBtn.addEventListener("click", async () => {
+        await fetch("/api/logout", {
+          method: "POST",
+        });
+
+        window.location.href = "/";
+      });
+
+      loadMe();
+    </script>
+  </body>
+</html>

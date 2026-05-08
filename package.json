@@ -1,0 +1,23 @@
+{
+  "name": "cse722-webauthn-project",
+  "version": "1.0.0",
+  "description": "CSE722 Project - Passwordless authentication using WebAuthn",
+  "license": "ISC",
+  "author": "Asif Mustafa",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^13.3.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
